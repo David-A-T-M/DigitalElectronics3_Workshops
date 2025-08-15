@@ -1,4 +1,4 @@
-# ✨ Exercise 2
+# ✨ Exercise 4
 ## Hexadecimal Counter on 7-Segment Display
 
 ## 📝 Statement

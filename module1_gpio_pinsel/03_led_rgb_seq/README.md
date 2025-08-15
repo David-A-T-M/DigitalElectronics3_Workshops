@@ -1,4 +1,4 @@
-# ✨ Exercise 2
+# ✨ Exercise 3
 ## Alternating Color Sequences on the Onboard RGB LED
 
 ## 📝 Statement
