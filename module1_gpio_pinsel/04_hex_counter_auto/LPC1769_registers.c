@@ -1,5 +1,5 @@
 /**
-* @file LPC1769_registers.c
+ * @file LPC1769_registers.c
  * @brief Controls a 7-segment display using GPIO pins on the LPC1769 board.
  *
  * This program configures GPIO pins P2.0-P2.6 to drive a 7-segment display.
