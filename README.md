@@ -44,7 +44,7 @@ This repository is actively used in _Digital Electronics 3 (ED3)_ to teach:
 
 Example projects are continuously added and refined. The current and planned topics include:
 
-- 🚧 GPIO and PINSEL.
+- ✅ GPIO and PINSEL.
 - 🗓️ Interrupts.
 - 🗓️ SysTick.
 - 🗓️ Timers.

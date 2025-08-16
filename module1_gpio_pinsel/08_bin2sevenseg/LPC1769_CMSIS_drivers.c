@@ -1,33 +1,20 @@
 /**
- * @file LPC1769_registers.c
+ * @file LPC1769_CMSIS_drivers.c
  * @brief GPIO and 7-segment display control for LPC1769.
  */
-#include "LPC17xx.h"
 
-/**
- * @def SEGMENTS_MASK(n)
- * @brief Mask for 7 segments of a display starting at bit n.
- * @param n The starting bit position for the segments.
- */
-#define SEGMENTS_MASK(n)   (0x7F << (n))
+#include "lpc17xx_gpio.h"
+#include "lpc17xx_pinsel.h"
 
-/**
- *
- * @param n
- */
-#define INPUT_PINS_MASK(n) (0xF << (n))
+/** Generic bit mask macro. */
+#define BIT_MASK(x)         (0x1 << (x))
+/** Generic n-bit mask macro. */
+#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
 
-/**
- * @def BUTTON_PIN
- * @brief Mask for the button connected.
- */
-#define BUTTON_PIN 0
-
-/**
- * @def DIGITS_SIZE
- * @brief Number of elements in the digits array.
- */
-#define DIGITS_SIZE (sizeof(digits) / sizeof(digits[0]))
+/** Mask for a 7 segments display. */
+#define SVN_SEGS            BITS_MASK(7, 0)
+/** Mask for input pins P0.0-P0.3. */
+#define INPUT_PINS          BITS_MASK(4, 0)
 
 /**
  * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
@@ -52,19 +39,28 @@ int main(void) {
     configGPIO();
 
     while (1) {
-        uint32_t value = LPC_GPIO0->FIOPIN & INPUT_PINS_MASK(0); // Read P0.0-P0.3
-        LPC_GPIO2->FIOCLR = SEGMENTS_MASK(0);                 // Clear all segments
-        LPC_GPIO2->FIOSET = digits[value];
+        uint32_t value = GPIO_ReadValue(GPIO_PORT_0) & INPUT_PINS;  // Read P0.0-P0.3.
+        GPIO_WriteValue(GPIO_PORT_2, digits[value]);                // Display the value on the 7-segment display.
     }
     return 0;
 }
 
 void configGPIO(void) {
-    LPC_PINCON->PINSEL0 &= ~(0xFF << BUTTON_PIN);           // P0.0-P0.3 as GPIO.
-    LPC_PINCON->PINMODE0 &= ~(0xFF << BUTTON_PIN);          // P0.0-P0.3 with pull-up.
-    LPC_GPIO0->FIODIR &= ~(0xF << BUTTON_PIN);            // P0.0 as input.
+    PINSEL_CFG_Type pinCfg = {0};                                   // PINSEL configuration structure.
 
-    LPC_PINCON->PINSEL4 &= ~(0x3FFF);                       // Sets P2.0-P2.6 as GPIO.
-    LPC_GPIO2->FIODIR |= SEGMENTS_MASK(0);                // Sets P2.0-P2.6 as output.
-    LPC_GPIO2->FIOCLR = SEGMENTS_MASK(0);                 // Turns off all segments.
+    pinCfg.portNum = PINSEL_PORT_0;
+    pinCfg.pinNum = PINSEL_PIN_0;
+    pinCfg.funcNum = PINSEL_FUNC_0;
+    pinCfg.pinMode = PINSEL_PULLUP;
+    pinCfg.openDrain = PINSEL_OD_NORMAL;
+
+    PINSEL_ConfigMultiplePins(&pinCfg, INPUT_PINS);                 // P0.0-P0.3 as GPIO with pull-up.
+
+    pinCfg.portNum = PINSEL_PORT_2;
+    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SEGS);                   // P2.0-P2.6 as GPIO
+
+    GPIO_SetDir(GPIO_PORT_0, INPUT_PINS, GPIO_INPUT);               // P0.0-P0.3 as input.
+    GPIO_SetDir(GPIO_PORT_2, SVN_SEGS, GPIO_OUTPUT);                // P2.0-P2.6 as output.
+
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SEGS);                          // Turn off all segments.
 }

@@ -6,21 +6,18 @@
  * It toggles the red LED on and off in a loop, creating a blinking effect.
  * The delay is implemented using a blocking nested loop.
  */
-#include "LPC17xx.h"
+
 #include "lpc17xx_pinsel.h"
 #include "lpc17xx_gpio.h"
 
-/**
- * @def RED_LED
- * @brief Bit mask for the red LED (P0.22).
- */
-#define RED_LED      (1<<22)
+/** Generic bit mask macro. */
+#define BIT_MASK(x)         (0x1 << (x))
 
-/**
- * @def DELAY
- * @brief Delay constant for LED timing.
- */
-#define DELAY       2500
+/** Bit mask for the red LED (P0.22). */
+#define RED_LED             BIT_MASK(22)
+
+/** Delay constant for LED timing. */
+#define DELAY               2500
 
 /**
  * @brief Configures the GPIO pin for the red LED as output.
@@ -50,6 +47,7 @@ int main(void) {
 
 void configGPIO(void) {
     PINSEL_CFG_Type PinCfg = {0};                   // Initialize the PINSEL configuration structure.
+
     PinCfg.portNum = PINSEL_PORT_0;
     PinCfg.pinNum = PINSEL_PIN_22;
     PinCfg.funcNum = PINSEL_FUNC_0;
@@ -64,6 +62,6 @@ void configGPIO(void) {
 }
 
 void delay() {
-    for(uint32_t i=0; i<DELAY; i++)
-        for(uint32_t j=0; j<DELAY; j++);
+    for (volatile uint32_t i = 0; i < DELAY; i++)
+        for (volatile uint32_t j = 0; j < DELAY; j++);
 }
