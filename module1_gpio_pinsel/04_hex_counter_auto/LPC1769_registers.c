@@ -47,7 +47,7 @@ int main(void) {
 
     while (1) {
         LPC_GPIO2->FIOCLR = SVN_SEGS;                   // Turn off all segments.
-        LPC_GPIO2->FIOSET |= digits[i % DIGITS_SIZE];   // Show the current digit.
+        LPC_GPIO2->FIOSET = digits[i % DIGITS_SIZE];    // Show the current digit.
 
         i++;
         delay();

@@ -32,7 +32,8 @@
 #define OVF_LED_DB          BITS_MASK(2, 8)
 
 /**
- * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
+ *  @brief Configures GPIO pins P2.0-P2.3 as outputs for the 4-bit ALU result display using LEDs,
+ *  and P2.4 as output for the overflow indicator LED.
  */
 void configGPIO(void);
 
@@ -61,11 +62,11 @@ int main(void) {
 
         if (LPC_GPIO0->FIOPIN & OP_MASK) {                          // Read P0.8
             const uint8_t result = add(A, B);                       // Perform addition.
-            LPC_GPIO2->FIOCLR = ~result;
+            LPC_GPIO2->FIOCLR = LED_MASK;
             LPC_GPIO2->FIOSET = result;
         } else {
             const uint8_t result = subtract(A, B);                  // Perform subtraction.
-            LPC_GPIO2->FIOCLR = ~result;
+            LPC_GPIO2->FIOCLR = LED_MASK;
             LPC_GPIO2->FIOSET = result;
         }
     }

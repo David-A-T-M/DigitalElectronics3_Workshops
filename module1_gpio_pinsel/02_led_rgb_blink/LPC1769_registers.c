@@ -53,7 +53,7 @@ void configGPIO(void) {
 
     LPC_GPIO0->FIODIR |= RED_LED;               // Set P0.22 as output.
 
-    LPC_GPIO0->FIOSET |= RED_LED;               // Force LED off initially.
+    LPC_GPIO0->FIOSET = RED_LED;                // Force LED off initially.
 }
 
 void delay() {

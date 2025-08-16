@@ -137,5 +137,5 @@ void setLEDColor(const Color *color) {
 
 void delay() {
     for (volatile uint32_t i = 0; i < DELAY; i++)
-        for (volatile uint32_t j = 0; j <DELAY ; j++);
+        for (volatile uint32_t j = 0; j < DELAY ; j++);
 }

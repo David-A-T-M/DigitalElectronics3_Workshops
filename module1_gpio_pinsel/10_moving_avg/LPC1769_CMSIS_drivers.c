@@ -20,7 +20,8 @@
 #define DELAY               2500
 
 /**
- * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
+ * @brief @brief Configures GPIO pins P0.0–P0.7 as inputs for sampling and P2.0–P2.7 as outputs
+ * for displaying the moving average result.
  */
 void configGPIO(void);
 
