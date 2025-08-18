@@ -53,7 +53,7 @@ const uint32_t digits[] = {0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07,
 int main(void) {
     configGPIO();
 
-    uint32_t i = 0;
+    uint32_t i = 1;
 
     while (1) {
         if (debounceButton()) {
@@ -82,6 +82,7 @@ void configGPIO(void) {
     GPIO_SetDir(GPIO_PORT_2, SVN_SEGS, GPIO_OUTPUT);            // P2.0-P2.6 as output.
 
     GPIO_ClearPins(GPIO_PORT_2, SVN_SEGS);                      // Turn off all segments.
+    GPIO_WriteValue(GPIO_PORT_2, digits[0]);                    // Start with digit 0.
 }
 
 uint8_t debounceButton(void) {
