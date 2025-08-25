@@ -1,7 +1,9 @@
 /**
  * @file LPC1769_CMSIS_drivers.c
- * @brief Implements GPIO and interrupt configuration for controlling
- *        an RGB LED and handling button input.
+ * @brief Controls an RGB LED sequence with pause/resume functionality using a button interrupt on the LPC1769.
+ *
+ * This example configures GPIO pins and an external interrupt for a button (P2.0) and an RGB LED (P0.22, P3.25, P3.26).
+ * The main loop cycles the RGB LED through a color sequence. Pressing the button toggles pause/resume of the sequence.
  */
 
 #include "lpc17xx_pinsel.h"
@@ -12,9 +14,13 @@
 /** Generic n-bit mask macro. */
 #define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
 
+/** Red LED connected to P0.22. */
 #define RED_LED             (22)
+/** Green LED connected to P3.25. */
 #define GREEN_LED           (25)
+/** Blue LED connected to P3.26. */
 #define BLUE_LED            (26)
+/** Button connected to P2.0. */
 #define BTN                 (0)
 
 /** Bit mask for the red LED (P0.22). */
@@ -27,10 +33,10 @@
 #define BTN_BIT             BIT_MASK(BTN)
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY               (2500)
 
 /** Number of colors in each sequence. */
-#define SEQUENCE_LENGTH     8
+#define SEQUENCE_LENGTH     (8)
 
 /**
  * @brief Color structure to represent RGB colors.
@@ -45,29 +51,32 @@ typedef struct {
 } Color;
 
 /**
- * @brief Configures GPIO pins for the RGB LED and button.
+ * @brief Configures GPIO pins for RGB LED outputs and button input.
  *
- * Sets the pin functions, modes, and directions for the red, green, and blue LEDs as outputs,
- * and the button as an input with a pull-up resistor.
+ * Sets P0.22 as output for the red LED, P3.25 and P3.26 as outputs for green and blue LEDs.
+ * Configures P2.0 as a GPIO input with pull-up for the button.
+ * Initializes all LEDs to the off state.
  */
 void configGPIO(void);
 
 /**
- * @brief Configures the external interrupt for the button.
+ * @brief Configures the external interrupt for the button on P2.0.
  *
- * Enables a falling edge interrupt on the button pin (P2.0) and clears any pending interrupts.
+ * Enables a falling edge interrupt for P2.0 and clears any pending interrupt flags.
+ * Enables the EINT3 interrupt in the NVIC.
  */
 void configInt(void);
 
 /**
  * @brief Sets the RGB LED to the specified color.
- * @param color Pointer to a Color struct defining the color to set.
+ * @param color Pointer to a Color struct defining the color to display.
+ *
+ * Turns on or off each LED channel (red, green, blue) according to the color struct.
  */
 void setLEDColor(const Color *color);
 
 /**
  * @brief Generates a blocking delay using nested loops.
- * Used to control the LED blink timing.
  */
 void delay();
 
@@ -80,20 +89,19 @@ const Color YELLOW  = {1, 1, 0};
 const Color WHITE   = {1, 1, 1};
 const Color BLACK   = {0, 0, 0};
 
-/** First color sequence. */
+/** Color sequence for the RGB LED. */
 const Color sequence[SEQUENCE_LENGTH] = {RED, GREEN, BLUE, CYAN, MAGENTA, YELLOW, WHITE, BLACK};
 
-/** Index for the current color in the sequence. */
-volatile uint32_t i = 0;
-
 /** Flag to control the LED sequence. */
-volatile uint8_t f = 1;
+volatile uint8_t flag = 1;
 
 int main(void) {
     configGPIO();
 
+    uint32_t i = 0;
+
     while (1) {
-        if (f) {
+        if (flag) {
             setLEDColor(&sequence[i % SEQUENCE_LENGTH]);
             delay();
             i++;
@@ -104,6 +112,7 @@ int main(void) {
 
 void configGPIO(void) {
     PINSEL_CFG_Type pinCfg = {0};
+
     pinCfg.portNum = PINSEL_PORT_0;
     pinCfg.pinNum = PINSEL_PIN_22;
     pinCfg.funcNum = PINSEL_FUNC_0;
@@ -156,7 +165,7 @@ void delay() {
 }
 
 void EINT3_IRQHandler(void) {
-    f = !f;                                                         // Toggle the flag to pause/resume the LED sequence.
+    flag = !flag;                                                   // Toggle the flag to pause/resume the LED sequence.
 
     GPIO_ClearInt(GPIO_PORT_2, BTN_BIT);                            // Clear interrupt flag on P2.0.
 }

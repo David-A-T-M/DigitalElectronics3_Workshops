@@ -1,11 +1,10 @@
 /**
  * @file LPC1769_CMSIS_drivers.c
- * @brief Implements a hexadecimal counter on a 7-segment display,
- *        incremented by a button interrupt using drivers.
+ * @brief Implements a hexadecimal counter on a 7-segment display using button interrupts.
  *
- * This file configures GPIO pins for a button and a 7-segment display,
- * sets up an interrupt for the button, and handles the display update
- * in the interrupt handler.
+ * This example configures GPIO pins for a button (P0.0) and a 7-segment display (P2.0-P2.6)
+ * on the LPC1769 microcontroller. Pressing the button triggers a GPIO interrupt that increments
+ * the displayed hexadecimal digit (0-F) on the 7-segment display.
  */
 
 #include "lpc17xx_pinsel.h"
@@ -16,12 +15,14 @@
 /** Generic n-bit mask macro. */
 #define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
 
+/** Button connected to P0.0. */
 #define BTN                 (0)
+/** 7-segment display connected to P2.0-P2.6. */
 #define SVN_SGS             (0)
 
 /** Mask for the button connected. */
 #define BTN_BIT             BIT_MASK(BTN)
-/** Mask for a 7 segments display. */
+/** Mask for the seven segments display. */
 #define SVN_SGS_BITS        BITS_MASK(7, SVN_SGS)
 
 /** Number of elements in the digits array. */
@@ -29,11 +30,17 @@
 
 /**
  * @brief Configures GPIO pins for button input and 7-segment display output.
+ *
+ * Sets P0.0 as a GPIO input with pull-up for the button.
+ * Sets P2.0-P2.6 as GPIO outputs for the 7-segment display.
+ * Initializes the display to show the first digit.
  */
 void configGPIO(void);
 
 /**
- * @brief Configures GPIO interrupt for the button.
+ * @brief Configures GPIO interrupt for the button on P0.0.
+ *
+ * Enables rising edge interrupt for P0.0 and enables the EINT3 interrupt in the NVIC.
  */
 void configInt(void);
 

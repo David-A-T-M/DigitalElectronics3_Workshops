@@ -1,11 +1,11 @@
 /**
- * @file LPC1769_registers.c
+ * @file LPC1769_CMSIS_drivers.c
  * @brief Implements a hexadecimal counter on a 7-segment display,
- *        incremented in main and decremented by a button interrupt using drivers.
+ *        incremented in main and decremented by a button interrupt.
  *
- * This file configures GPIO pins for a button and a 7-segment display,
- * sets up an interrupt for the button, and handles the display update
- * in the interrupt handler.
+ * This example configures GPIO pins for a button (P2.13) and a 7-segment display (P2.0-P2.6)
+ * on the LPC1769 microcontroller. The main loop increments the displayed hexadecimal digit (0-F),
+ * while pressing the button triggers an EINT3 interrupt that decrements the digit.
  */
 
 #include "lpc17xx_pinsel.h"
@@ -19,27 +19,36 @@
 
 /** Button connected to P2.13. */
 #define BTN                 (13)
+/** 7-segment display connected to P2.0-P2.6. */
 #define SVN_SGS             (0)
 
+/** Mask for the button connected. */
 #define BTN_BIT             BIT_MASK(BTN)
-/** Mask for the EINT3 interrupt. */
-#define EINT3_BIT           BIT_MASK(3)
 /** Mask for a 7 segments display. */
 #define SVN_SGS_BITS        BITS_MASK(7, 0)
+/** Mask for the EINT3 interrupt. */
+#define EINT3_BIT           BIT_MASK(3)
 
 /** Number of elements in the digits array. */
 #define DIGITS_SIZE         (sizeof(digits) / sizeof(digits[0]))
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY               (2500)
 
 /**
  * @brief Configures GPIO pins for button input and 7-segment display output.
+ *
+ * Sets P2.13 as an input with pull-up and configures it for EINT3 external interrupt.
+ * Sets P2.0-P2.6 as GPIO outputs for the 7-segment display.
+ * Initializes the display to show the first digit.
  */
 void configGPIO(void);
 
 /**
- * @brief Configures EINT3 interrupt for the button.
+ * @brief Configures EINT3 external interrupt for the button on P2.13.
+ *
+ * Sets EINT3 to be level-sensitive and active low.
+ * Clears any pending EINT3 interrupt and enables it in the NVIC.
  */
 void configInt(void);
 

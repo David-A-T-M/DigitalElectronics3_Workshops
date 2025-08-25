@@ -1,6 +1,9 @@
 /**
  * @file LPC1769_registers.c
- * @brief Configures GPIO and external interrupt for toggling the red LED using a button on the LPC1769.
+ * @brief Demonstrates configuring GPIO and external interrupts on the LPC1769.
+ *
+ * This example sets up a red LED on P0.22 and a button on P2.10.
+ * Pressing the button triggers an external interrupt (EINT0) that toggles the LED.
  */
 
 #include "LPC17xx.h"
@@ -10,30 +13,39 @@
 /** Generic n-bit mask macro. */
 #define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
 
-#define BTN                 (10)
+/** Red LED connected to P0.22. */
 #define RED_LED             (22)
+/** Button connected to P2.10. */
+#define BTN                 (10)
 
-#define BTN_BIT             BIT_MASK(BTN)
+/** Mask for the red LED (P0.22). */
 #define RED_BIT             BIT_MASK(RED_LED)
+/** Mask for the button connected. */
+#define BTN_BIT             BIT_MASK(BTN)
+/** Mask for the EINT0 interrupt. */
 #define EINT0_BIT           BIT_MASK(0)
 
-#define BTN_PCB             BITS_MASK(2, BTN * 2)
+/** PCB mask for the red LED (P0.22). */
 #define RED_PCB             BITS_MASK(2, (RED_LED - 16) * 2)
-
+/** PCB mask for the button connected. */
+#define BTN_PCB             BITS_MASK(2, BTN * 2)
+/** PCB lower bit mask for the button connected. */
 #define BTN_PCB_L           BIT_MASK(BTN * 2)
 
 /**
- * @brief Configures GPIO pins for the red LED and button.
+ * @brief Initializes GPIO pins for the red LED and button.
  *
- * Sets the pin functions and directions for the red LED (output) and the button (input with pull-up).
- * Also configures the button pin for external interrupt functionality.
+ * Configures P0.22 as a GPIO output for the red LED and P2.10 as an input with pull-up for the button.
+ * Sets P2.10 to function as an external interrupt (EINT0) source.
+ * Ensures the LED is initially turned off.
  */
 void configGPIO(void);
 
 /**
- * @brief Configures the external interrupt for the button.
+ * @brief Sets up the external interrupt for the button on P2.10 (EINT0).
  *
- * Sets EINT0 to trigger on a falling edge, clears any pending interrupts, and enables the interrupt in the NVIC.
+ * Configures EINT0 to trigger on a falling edge, clears any pending interrupt flags,
+ * and enables the interrupt in the NVIC.
  */
 void configInt(void);
 
@@ -69,7 +81,7 @@ void configInt(void) {
 }
 
 void EINT0_IRQHandler(void) {
-    const uint32_t current = LPC_GPIO2->FIOPIN;
+    const uint32_t current = LPC_GPIO2->FIOPIN; // Read port 2.
 
     LPC_GPIO0->FIOSET = ~current & RED_BIT;     // Toggle LED state.
     LPC_GPIO0->FIOCLR = current & RED_BIT;
