@@ -7,24 +7,28 @@
 #include "LPC17xx.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
+
+/** Button connected to P0.0. */
+#define BTN (0)
 
 /** Mask for the button connected. */
-#define BUTTON_PIN          BIT_MASK(0)
-/** Double bit mask for the button connected. */
-#define BUTTON_PIN_DB       BITS_MASK(2, 0)
+#define BTN_BIT  BIT_MASK(BTN)
 /** Mask for a 7 segments display. */
-#define SVN_SEGS            BITS_MASK(7, 0)
-/** Double bit mask for a 7 segments display. */
-#define SVN_SEGS_DB         BITS_MASK(14, 0)
+#define SVN_SEGS BITS_MASK(7, 0)
+
+/** PCB mask for the button connected. */
+#define BTN_PCB      BITS_MASK(2, BTN * 2)
+/** PCB mask for a 7 segments display. */
+#define SVN_SEGS_PCB BITS_MASK(14, 0)
 
 /** Number of elements in the digits array. */
-#define DIGITS_SIZE         (sizeof(digits) / sizeof(digits[0]))
+#define DIGITS_SIZE (sizeof(digits) / sizeof(digits[0]))
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY 2500
 
 /**
  * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
@@ -65,23 +69,23 @@ int main(void) {
 }
 
 void configGPIO(void) {
-    LPC_PINCON->PINSEL0 &= ~(BUTTON_PIN_DB);                // P0.0 as GPIO.
-    LPC_PINCON->PINMODE0 &= ~(BUTTON_PIN_DB);               // P0.0 with pull-up.
-    LPC_GPIO0->FIODIR &= ~(BUTTON_PIN);                     // P0.0 as input.
+    LPC_PINCON->PINSEL0 &= ~(BTN_PCB);     // P0.0 as GPIO.
+    LPC_PINCON->PINMODE0 &= ~(BTN_PCB);    // P0.0 with pull-up.
+    LPC_GPIO0->FIODIR &= ~(BTN_BIT);       // P0.0 as input.
 
-    LPC_PINCON->PINSEL4 &= ~(SVN_SEGS_DB);                  // P2.0-P2.6 as GPIO.
-    LPC_GPIO2->FIODIR |= SVN_SEGS;                          // P2.0-P2.6 as output.
+    LPC_PINCON->PINSEL4 &= ~(SVN_SEGS_PCB);    // P2.0-P2.6 as GPIO.
+    LPC_GPIO2->FIODIR |= SVN_SEGS;             // P2.0-P2.6 as output.
 
-    LPC_GPIO2->FIOCLR = SVN_SEGS;                           // Turns off all segments.
-    LPC_GPIO2->FIOSET = digits[0];                          // Start with digit 0.
+    LPC_GPIO2->FIOCLR = SVN_SEGS;     // Turns off all segments.
+    LPC_GPIO2->FIOSET = digits[0];    // Start with digit 0.
 }
 
 uint8_t debounceButton(void) {
-    if (!(LPC_GPIO0->FIOPIN & BUTTON_PIN)) {                // Button pressed.
-        delay();                                            // Debounce delay
+    if (!(LPC_GPIO0->FIOPIN & BTN_BIT)) {    // Button pressed.
+        delay();                             // Debounce delay
 
-        if (!(LPC_GPIO0->FIOPIN & BUTTON_PIN)) {            // Confirm still pressed
-            while (!(LPC_GPIO0->FIOPIN & BUTTON_PIN)) {}    // Wait for release
+        if (!(LPC_GPIO0->FIOPIN & BTN_BIT)) {            // Confirm still pressed
+            while (!(LPC_GPIO0->FIOPIN & BTN_BIT)) {}    // Wait for release
             return 1;
         }
     }
@@ -90,5 +94,6 @@ uint8_t debounceButton(void) {
 
 void delay() {
     for (volatile uint32_t i = 0; i < DELAY; i++)
-        for (volatile uint32_t j = 0; j < DELAY; j++);
+        for (volatile uint32_t j = 0; j < DELAY; j++)
+            __NOP();
 }

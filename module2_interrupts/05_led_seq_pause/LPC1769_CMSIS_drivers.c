@@ -6,37 +6,37 @@
  * The main loop cycles the RGB LED through a color sequence. Pressing the button toggles pause/resume of the sequence.
  */
 
-#include "lpc17xx_pinsel.h"
 #include "lpc17xx_gpio.h"
+#include "lpc17xx_pinsel.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Red LED connected to P0.22. */
-#define RED_LED             (22)
+#define RED_LED   (22)
 /** Green LED connected to P3.25. */
-#define GREEN_LED           (25)
+#define GREEN_LED (25)
 /** Blue LED connected to P3.26. */
-#define BLUE_LED            (26)
+#define BLUE_LED  (26)
 /** Button connected to P2.0. */
-#define BTN                 (0)
+#define BTN       (0)
 
 /** Bit mask for the red LED (P0.22). */
-#define RED_BIT             BIT_MASK(RED_LED)
+#define RED_BIT   BIT_MASK(RED_LED)
 /** Bit mask for the green LED (P3.25). */
-#define GREEN_BIT           BIT_MASK(GREEN_LED)
+#define GREEN_BIT BIT_MASK(GREEN_LED)
 /** Bit mask for the blue LED (P3.26). */
-#define BLUE_BIT            BIT_MASK(BLUE_LED)
+#define BLUE_BIT  BIT_MASK(BLUE_LED)
 /** Bit mask for the button (P0.0). */
-#define BTN_BIT             BIT_MASK(BTN)
+#define BTN_BIT   BIT_MASK(BTN)
 
 /** Delay constant for LED timing. */
-#define DELAY               (2500)
+#define DELAY (2500)
 
 /** Number of colors in each sequence. */
-#define SEQUENCE_LENGTH     (8)
+#define SEQUENCE_LENGTH (8)
 
 /**
  * @brief Color structure to represent RGB colors.
@@ -73,7 +73,7 @@ void configInt(void);
  *
  * Turns on or off each LED channel (red, green, blue) according to the color struct.
  */
-void setLEDColor(const Color *color);
+void setLEDColor(const Color* color);
 
 /**
  * @brief Generates a blocking delay using nested loops.
@@ -113,59 +113,60 @@ int main(void) {
 void configGPIO(void) {
     PINSEL_CFG_Type pinCfg = {0};
 
-    pinCfg.portNum = PINSEL_PORT_0;
-    pinCfg.pinNum = PINSEL_PIN_22;
-    pinCfg.funcNum = PINSEL_FUNC_0;
-    pinCfg.pinMode = PINSEL_PULLUP;
+    pinCfg.portNum   = PINSEL_PORT_0;
+    pinCfg.pinNum    = PINSEL_PIN_22;
+    pinCfg.funcNum   = PINSEL_FUNC_0;
+    pinCfg.pinMode   = PINSEL_PULLUP;
     pinCfg.openDrain = PINSEL_OD_NORMAL;
 
-    PINSEL_ConfigPin(&pinCfg);                                      // P0.22 as GPIO.
-    GPIO_SetDir(GPIO_PORT_0, RED_BIT, GPIO_OUTPUT);                 // P0.22 as output.
+    PINSEL_ConfigPin(&pinCfg);                         // P0.22 as GPIO.
+    GPIO_SetDir(GPIO_PORT_0, RED_BIT, GPIO_OUTPUT);    // P0.22 as output.
 
     pinCfg.portNum = PINSEL_PORT_3;
     PINSEL_ConfigMultiplePins(&pinCfg, GREEN_BIT | BLUE_BIT);       // P3.25 and P3.26 as GPIO.
     GPIO_SetDir(GPIO_PORT_3, GREEN_BIT | BLUE_BIT, GPIO_OUTPUT);    // P3.25 and P3.26 as output.
 
     pinCfg.portNum = PINSEL_PORT_2;
-    pinCfg.pinNum = PINSEL_PIN_0;
-    PINSEL_ConfigPin(&pinCfg);                                      // P2.0 as GPIO with pull-up.
-    GPIO_SetDir(GPIO_PORT_2, BTN_BIT, GPIO_INPUT);                  // P2.0 as input.
+    pinCfg.pinNum  = PINSEL_PIN_0;
+    PINSEL_ConfigPin(&pinCfg);                        // P2.0 as GPIO with pull-up.
+    GPIO_SetDir(GPIO_PORT_2, BTN_BIT, GPIO_INPUT);    // P2.0 as input.
 
-    GPIO_ClearPins(GPIO_PORT_0, RED_BIT);                           // Red LED off.
-    GPIO_ClearPins(GPIO_PORT_3, GREEN_BIT | BLUE_BIT);              // Green and blue
+    GPIO_ClearPins(GPIO_PORT_0, RED_BIT);                 // Red LED off.
+    GPIO_ClearPins(GPIO_PORT_3, GREEN_BIT | BLUE_BIT);    // Green and blue
 }
 
-void setLEDColor(const Color *color) {
+void setLEDColor(const Color* color) {
     if (color->r)
-        GPIO_ClearPins(GPIO_PORT_0, RED_BIT);                       // Turn on red LED.
+        GPIO_ClearPins(GPIO_PORT_0, RED_BIT);    // Turn on red LED.
     else
-        GPIO_SetPins(GPIO_PORT_0, RED_BIT);                         // Turn off red LED.
+        GPIO_SetPins(GPIO_PORT_0, RED_BIT);    // Turn off red LED.
 
     if (color->g)
-        GPIO_ClearPins(GPIO_PORT_3, GREEN_BIT);                     // Turn on green LED.
+        GPIO_ClearPins(GPIO_PORT_3, GREEN_BIT);    // Turn on green LED.
     else
-        GPIO_SetPins(GPIO_PORT_3, GREEN_BIT);                       // Turn off green LED.
+        GPIO_SetPins(GPIO_PORT_3, GREEN_BIT);    // Turn off green LED.
 
     if (color->b)
-        GPIO_ClearPins(GPIO_PORT_3, BLUE_BIT);                      // Turn on blue LED.
+        GPIO_ClearPins(GPIO_PORT_3, BLUE_BIT);    // Turn on blue LED.
     else
-        GPIO_SetPins(GPIO_PORT_3, BLUE_BIT);                        // Turn off blue LED.
+        GPIO_SetPins(GPIO_PORT_3, BLUE_BIT);    // Turn off blue LED.
 }
 
 void configInt(void) {
-    GPIO_IntCmd(GPIO_PORT_2, BTN_BIT, GPIO_INT_FALLING);            // Configure falling edge interrupt on P2.0.
+    GPIO_IntCmd(GPIO_PORT_2, BTN_BIT, GPIO_INT_FALLING);    // Configure falling edge interrupt on P2.0.
 
-    GPIO_ClearInt(GPIO_PORT_2, BTN_BIT);                            // Clear any pending interrupts on P2.0.
-    NVIC_EnableIRQ(EINT3_IRQn);                                     // Enable EINT3 interrupt in NVIC.
+    GPIO_ClearInt(GPIO_PORT_2, BTN_BIT);    // Clear any pending interrupts on P2.0.
+    NVIC_EnableIRQ(EINT3_IRQn);             // Enable EINT3 interrupt in NVIC.
 }
 
 void delay() {
     for (volatile uint32_t j = 0; j < DELAY; j++)
-        for (volatile uint32_t k = 0; k < DELAY ; k++);
+        for (volatile uint32_t k = 0; k < DELAY; k++)
+            __NOP();
 }
 
 void EINT3_IRQHandler(void) {
-    flag = !flag;                                                   // Toggle the flag to pause/resume the LED sequence.
+    flag = !flag;    // Toggle the flag to pause/resume the LED sequence.
 
-    GPIO_ClearInt(GPIO_PORT_2, BTN_BIT);                            // Clear interrupt flag on P2.0.
+    GPIO_ClearInt(GPIO_PORT_2, BTN_BIT);    // Clear interrupt flag on P2.0.
 }

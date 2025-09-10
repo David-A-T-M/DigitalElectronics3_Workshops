@@ -6,28 +6,35 @@
  * It alternates between two color sequences.
  */
 
-#include "lpc17xx_pinsel.h"
 #include "lpc17xx_gpio.h"
+#include "lpc17xx_pinsel.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x) (0x1 << (x))
 
-/** Bit mask for the red LED (P0.22). */
-#define RED_LED             BIT_MASK(22)
-/** Bit mask for the green LED (P3.25). */
-#define GREEN_LED           BIT_MASK(25)
-/** Bit mask for the blue LED (P3.26). */
-#define BLUE_LED            BIT_MASK(26)
+/** Red LED connected to P0.22. */
+#define RED_LED   (22)
+/** Green LED connected to P3.25. */
+#define GREEN_LED (25)
+/** Blue LED connected to P3.26. */
+#define BLUE_LED  (26)
+
+/** Mask for the red LED (P0.22). */
+#define RED_BIT   BIT_MASK(RED_LED)
+/** Mask for the green LED (P3.25). */
+#define GREEN_BIT BIT_MASK(GREEN_LED)
+/** Mask for the blue LED (P3.26). */
+#define BLUE_BIT  BIT_MASK(BLUE_LED)
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY 2500
 
 /** Number of times to repeat each sequence before switching. */
-#define CYCLE_REPEATS       10
+#define CYCLE_REPEATS   10
 /** Number of color sequences defined. */
-#define NUM_SEQUENCES       2
+#define NUM_SEQUENCES   2
 /** Number of colors in each sequence. */
-#define SEQUENCE_LENGTH     3
+#define SEQUENCE_LENGTH 3
 
 /**
  * @brief Color structure to represent RGB colors.
@@ -52,7 +59,7 @@ void configGPIO(void);
  * @brief Sets the RGB LED to the specified color.
  * @param color Pointer to a Color struct defining the color to set.
  */
-void setLEDColor(const Color *color);
+void setLEDColor(const Color* color);
 
 /**
  * @brief Generates a blocking delay using nested loops.
@@ -94,48 +101,49 @@ int main(void) {
 }
 
 void configGPIO(void) {
-    PINSEL_CFG_Type pinCfg = {0};                       // PINSEL configuration structure.
+    PINSEL_CFG_Type pinCfg = {0};    // PINSEL configuration structure.
 
-    pinCfg.portNum = PINSEL_PORT_0;
-    pinCfg.pinNum = PINSEL_PIN_22;
-    pinCfg.funcNum = PINSEL_FUNC_0;
-    pinCfg.pinMode = PINSEL_TRISTATE;
+    pinCfg.portNum   = PINSEL_PORT_0;
+    pinCfg.pinNum    = PINSEL_PIN_22;
+    pinCfg.funcNum   = PINSEL_FUNC_0;
+    pinCfg.pinMode   = PINSEL_TRISTATE;
     pinCfg.openDrain = PINSEL_OD_NORMAL;
 
-    PINSEL_ConfigPin(&pinCfg);                          // P0.22 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P0.22 as GPIO.
 
     pinCfg.portNum = PINSEL_PORT_3;
-    pinCfg.pinNum = PINSEL_PIN_25;
-    PINSEL_ConfigPin(&pinCfg);                          // P3.25 as GPIO.
+    pinCfg.pinNum  = PINSEL_PIN_25;
+    PINSEL_ConfigPin(&pinCfg);    // P3.25 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_26;
-    PINSEL_ConfigPin(&pinCfg);                          // P3.26 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P3.26 as GPIO.
 
-    GPIO_SetDir(GPIO_PORT_0, RED_LED, GPIO_OUTPUT);                 // P0.22 as output.
-    GPIO_SetDir(GPIO_PORT_3, GREEN_LED | BLUE_LED, GPIO_OUTPUT);    // P3.25 and P3.26 as output.
+    GPIO_SetDir(GPIO_PORT_0, RED_BIT, GPIO_OUTPUT);                 // P0.22 as output.
+    GPIO_SetDir(GPIO_PORT_3, GREEN_BIT | BLUE_BIT, GPIO_OUTPUT);    // P3.25 and P3.26 as output.
 
-    GPIO_SetPins(GPIO_PORT_0, RED_LED);                 // Red LED off.
-    GPIO_SetPins(GPIO_PORT_3, GREEN_LED | BLUE_LED);    // Green and blue LEDs off.
+    GPIO_SetPins(GPIO_PORT_0, RED_BIT);                 // Red LED off.
+    GPIO_SetPins(GPIO_PORT_3, GREEN_BIT | BLUE_BIT);    // Green and blue LEDs off.
 }
 
-void setLEDColor(const Color *color) {
+void setLEDColor(const Color* color) {
     if (color->r)
-        GPIO_ClearPins(GPIO_PORT_0, RED_LED);           // Turn on red LED.
+        GPIO_ClearPins(GPIO_PORT_0, RED_BIT);    // Turn on red LED.
     else
-        GPIO_SetPins(GPIO_PORT_0, RED_LED);             // Turn off red LED.
+        GPIO_SetPins(GPIO_PORT_0, RED_BIT);    // Turn off red LED.
 
     if (color->g)
-        GPIO_ClearPins(GPIO_PORT_3, GREEN_LED);         // Turn on green LED.
+        GPIO_ClearPins(GPIO_PORT_3, GREEN_BIT);    // Turn on green LED.
     else
-        GPIO_SetPins(GPIO_PORT_3, GREEN_LED);           // Turn off green LED.
+        GPIO_SetPins(GPIO_PORT_3, GREEN_BIT);    // Turn off green LED.
 
     if (color->b)
-        GPIO_ClearPins(GPIO_PORT_3, BLUE_LED);          // Turn on blue LED.
+        GPIO_ClearPins(GPIO_PORT_3, BLUE_BIT);    // Turn on blue LED.
     else
-        GPIO_SetPins(GPIO_PORT_3, BLUE_LED);            // Turn off blue LED.
+        GPIO_SetPins(GPIO_PORT_3, BLUE_BIT);    // Turn off blue LED.
 }
 
 void delay() {
     for (volatile uint32_t i = 0; i < DELAY; i++)
-        for (volatile uint32_t j = 0; j < DELAY ; j++);
+        for (volatile uint32_t j = 0; j < DELAY; j++)
+            __NOP();
 }

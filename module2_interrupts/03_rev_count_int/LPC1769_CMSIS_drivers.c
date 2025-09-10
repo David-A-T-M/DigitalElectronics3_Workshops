@@ -8,32 +8,32 @@
  * while pressing the button triggers an EINT3 interrupt that decrements the digit.
  */
 
-#include "lpc17xx_pinsel.h"
-#include "lpc17xx_gpio.h"
 #include "lpc17xx_exti.h"
+#include "lpc17xx_gpio.h"
+#include "lpc17xx_pinsel.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Button connected to P2.13. */
-#define BTN                 (13)
+#define BTN     (13)
 /** 7-segment display connected to P2.0-P2.6. */
-#define SVN_SGS             (0)
+#define SVN_SGS (0)
 
 /** Mask for the button connected. */
-#define BTN_BIT             BIT_MASK(BTN)
+#define BTN_BIT      BIT_MASK(BTN)
 /** Mask for a 7 segments display. */
-#define SVN_SGS_BITS        BITS_MASK(7, 0)
+#define SVN_SGS_BITS BITS_MASK(7, 0)
 /** Mask for the EINT3 interrupt. */
-#define EINT3_BIT           BIT_MASK(3)
+#define EINT3_BIT    BIT_MASK(3)
 
 /** Number of elements in the digits array. */
-#define DIGITS_SIZE         (sizeof(digits) / sizeof(digits[0]))
+#define DIGITS_SIZE (sizeof(digits) / sizeof(digits[0]))
 
 /** Delay constant for LED timing. */
-#define DELAY               (2500)
+#define DELAY (2500)
 
 /**
  * @brief Configures GPIO pins for button input and 7-segment display output.
@@ -68,59 +68,60 @@ int main(void) {
     configGPIO();
     configInt();
 
-    while(1) {
-        GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);          // Clears all segments.
-        GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]); // Sets segments for current digit.
+    while (1) {
+        GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);             // Clears all segments.
+        GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);    // Sets segments for current digit.
 
         delay();
 
         i++;
     }
-    return 0 ;
+    return 0;
 }
 
 void configGPIO(void) {
-    PINSEL_CFG_Type pinCfg = {0};                           // PINSEL configuration structure.
+    PINSEL_CFG_Type pinCfg = {0};    // PINSEL configuration structure.
 
-    pinCfg.portNum = PINSEL_PORT_2;
-    pinCfg.pinNum = PINSEL_PIN_13;
-    pinCfg.funcNum = PINSEL_FUNC_0;
-    pinCfg.pinMode = PINSEL_PULLUP;
+    pinCfg.portNum   = PINSEL_PORT_2;
+    pinCfg.pinNum    = PINSEL_PIN_13;
+    pinCfg.funcNum   = PINSEL_FUNC_0;
+    pinCfg.pinMode   = PINSEL_PULLUP;
     pinCfg.openDrain = PINSEL_OD_NORMAL;
 
-    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SGS_BITS);       // P2.0-P2.6 as GPIO.
+    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SGS_BITS);    // P2.0-P2.6 as GPIO.
 
     pinCfg.funcNum = PINSEL_FUNC_1;
-    PINSEL_ConfigPin(&pinCfg);                              // P2.13 as EINT3.
+    PINSEL_ConfigPin(&pinCfg);    // P2.13 as EINT3.
 
     GPIO_SetDir(GPIO_PORT_2, BTN_BIT, GPIO_INPUT);          // P2.13 as input.
     GPIO_SetDir(GPIO_PORT_2, SVN_SGS_BITS, GPIO_OUTPUT);    // P2.0-P2.6 as output.
 
-    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);              // Turns off all segments.
-    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);     // Start with digit 0.
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);             // Turns off all segments.
+    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);    // Start with digit 0.
     i++;
 }
 
 void configInt(void) {
-    EXTI_CFG_Type extiCfg = {0};                            // EXTI configuration structure.
-    extiCfg.line = EXTI_EINT3;                              // EINT3 line.
-    extiCfg.mode = EXTI_LEVEL_SENSITIVE;                    // Level-sensitive mode.
-    extiCfg.polarity = EXTI_LOW_ACTIVE;                     // Low active polarity.
+    EXTI_CFG_Type extiCfg = {0};                     // EXTI configuration structure.
+    extiCfg.line          = EXTI_EINT3;              // EINT3 line.
+    extiCfg.mode          = EXTI_LEVEL_SENSITIVE;    // Level-sensitive mode.
+    extiCfg.polarity      = EXTI_LOW_ACTIVE;         // Low active polarity.
 
-    EXTI_ConfigEnable(&extiCfg);                            // Configure EINT3.
+    EXTI_ConfigEnable(&extiCfg);    // Configure EINT3.
 }
 
 void EINT3_IRQHandler(void) {
     i--;
-    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);              // Turns off all segments.
-    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);     // Start with digit 0.
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);             // Turns off all segments.
+    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);    // Start with digit 0.
 
     delay();
 
-    EXTI_ClearFlag(EXTI_EINT3);                             // Clear the EINT3 interrupt flag.
+    EXTI_ClearFlag(EXTI_EINT3);    // Clear the EINT3 interrupt flag.
 }
 
 void delay() {
     for (volatile uint32_t j = 0; j < DELAY; j++)
-        for (volatile uint32_t k = 0; k < DELAY; k++);
+        for (volatile uint32_t k = 0; k < DELAY; k++)
+            __NOP();
 }

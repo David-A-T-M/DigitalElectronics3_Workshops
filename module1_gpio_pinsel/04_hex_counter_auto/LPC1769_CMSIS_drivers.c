@@ -11,16 +11,16 @@
 #include "LPC17xx_pinsel.h"
 
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Mask for a 7 segments display. */
-#define SVN_SEGS            BITS_MASK(7, 0)
+#define SVN_SEGS BITS_MASK(7, 0)
 
 /** Number of elements in the digits array. */
-#define DIGITS_SIZE         (sizeof(digits) / sizeof(digits[0]))
+#define DIGITS_SIZE (sizeof(digits) / sizeof(digits[0]))
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY 2500
 
 /**
  * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
@@ -45,7 +45,7 @@ int main(void) {
     uint32_t i = 0;
 
     while (1) {
-        GPIO_WriteValue(GPIO_PORT_2, digits[i % DIGITS_SIZE]);  // Show the current digit.
+        GPIO_WriteValue(GPIO_PORT_2, digits[i % DIGITS_SIZE]);    // Show the current digit.
 
         // Alternatively: for atomic operations
         /*
@@ -60,47 +60,48 @@ int main(void) {
 }
 
 void configGPIO(void) {
-    PINSEL_CFG_Type pinCfg = {0};                               // PINSEL configuration structure.
+    PINSEL_CFG_Type pinCfg = {0};    // PINSEL configuration structure.
 
-    pinCfg.portNum = PINSEL_PORT_2;
-    pinCfg.pinNum = PINSEL_PIN_0;
-    pinCfg.funcNum = PINSEL_FUNC_0;
-    pinCfg.pinMode = PINSEL_TRISTATE;
+    pinCfg.portNum   = PINSEL_PORT_2;
+    pinCfg.pinNum    = PINSEL_PIN_0;
+    pinCfg.funcNum   = PINSEL_FUNC_0;
+    pinCfg.pinMode   = PINSEL_TRISTATE;
     pinCfg.openDrain = PINSEL_OD_NORMAL;
 
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.0 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.0 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_1;
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.1 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.1 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_2;
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.2 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.2 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_3;
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.3 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.3 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_4;
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.4 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.4 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_5;
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.5 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.5 as GPIO.
 
     pinCfg.pinNum = PINSEL_PIN_6;
-    PINSEL_ConfigPin(&pinCfg);                                  // P2.6 as GPIO.
+    PINSEL_ConfigPin(&pinCfg);    // P2.6 as GPIO.
 
     // Alternatively: configure multiple pins at once.
     /*
     PINSEL_ConfigMultiplePins(&pinCfg, SVN_SEGS);               // P2.0-P2.6 as GPIO.
     */
 
-    GPIO_SetMask(GPIO_PORT_2, ~SVN_SEGS, ENABLE);               // Optional: Set mask for protection.
+    GPIO_SetMask(GPIO_PORT_2, ~SVN_SEGS, ENABLE);    // Optional: Set mask for protection.
 
-    GPIO_SetDir(GPIO_PORT_2, SVN_SEGS, GPIO_OUTPUT);            // P2.0-P2.6 as output.
+    GPIO_SetDir(GPIO_PORT_2, SVN_SEGS, GPIO_OUTPUT);    // P2.0-P2.6 as output.
 
-    GPIO_ClearPins(GPIO_PORT_2, SVN_SEGS);                      // Turn off all segments.
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SEGS);    // Turn off all segments.
 }
 
 void delay() {
     for (volatile uint32_t i = 0; i < DELAY; i++)
-        for (volatile uint32_t j = 0; j < DELAY; j++);
+        for (volatile uint32_t j = 0; j < DELAY; j++)
+            __NOP();
 }

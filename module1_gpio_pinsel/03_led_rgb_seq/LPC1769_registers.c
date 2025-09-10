@@ -9,30 +9,40 @@
 #include "LPC17xx.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
-/** Bit mask for the red LED (P0.22). */
-#define RED_LED             BIT_MASK(22)
-/** Bit mask for the green LED (P3.25). */
-#define GREEN_LED           BIT_MASK(25)
-/** Bit mask for the blue LED (P3.26). */
-#define BLUE_LED            BIT_MASK(26)
-/** Double bit mask for the red LED (P0.22). */
-#define RED_LED_DB          BITS_MASK(2, 12)
-/** Double bit mask for the green and blue LEDs (P3.25 and P3.26). */
-#define GREEN_BLUE_LED_DB   BITS_MASK(4, 18)
+/** Red LED connected to P0.22. */
+#define RED_LED   (22)
+/** Green LED connected to P3.25. */
+#define GREEN_LED (25)
+/** Blue LED connected to P3.26. */
+#define BLUE_LED  (26)
+
+/** Mask for the red LED (P0.22). */
+#define RED_BIT   BIT_MASK(RED_LED)
+/** Mask for the green LED (P3.25). */
+#define GREEN_BIT BIT_MASK(GREEN_LED)
+/** Mask for the blue LED (P3.26). */
+#define BLUE_BIT  BIT_MASK(BLUE_LED)
+
+/** PCB mask for the red LED (P0.22). */
+#define RED_PCB   BITS_MASK(2, (RED_LED - 16) * 2)
+/** PCB mask for the green LED (P3.25). */
+#define GREEN_PCB BITS_MASK(2, (GREEN_LED - 16) * 2)
+/** PCB mask for the blue LED (P3.26). */
+#define BLUE_PCB  BITS_MASK(2, (BLUE_LED - 16) * 2)
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY 2500
 
 /** Number of times to repeat each sequence before switching. */
-#define CYCLE_REPEATS       10
+#define CYCLE_REPEATS   10
 /** Number of color sequences defined. */
-#define NUM_SEQUENCES       2
+#define NUM_SEQUENCES   2
 /** Number of colors in each sequence. */
-#define SEQUENCE_LENGTH     3
+#define SEQUENCE_LENGTH 3
 
 /**
  * @brief Color structure to represent RGB colors.
@@ -57,7 +67,7 @@ void configGPIO(void);
  * @brief Sets the RGB LED to the specified color.
  * @param color Pointer to a Color struct defining the color to set.
  */
-void setLEDColor(const Color *color);
+void setLEDColor(const Color* color);
 
 /**
  * @brief Generates a blocking delay using nested loops.
@@ -99,34 +109,35 @@ int main(void) {
 }
 
 void configGPIO(void) {
-    LPC_PINCON->PINSEL1 &= ~(RED_LED_DB);           // P0.22 as GPIO.
-    LPC_PINCON->PINSEL7 &= ~(GREEN_BLUE_LED_DB);    // P3.25 and P3.26 as GPIO.
+    LPC_PINCON->PINSEL1 &= ~(RED_PCB);                 // P0.22 as GPIO.
+    LPC_PINCON->PINSEL7 &= ~(GREEN_PCB | BLUE_PCB);    // P3.25 and P3.26 as GPIO.
 
-    LPC_GPIO0->FIODIR |= RED_LED;                   // P0.22 as output.
-    LPC_GPIO3->FIODIR |= GREEN_LED | BLUE_LED;      // P3.25 and P3.26 as output.
+    LPC_GPIO0->FIODIR |= RED_BIT;                 // P0.22 as output.
+    LPC_GPIO3->FIODIR |= GREEN_BIT | BLUE_BIT;    // P3.25 and P3.26 as output.
 
-    LPC_GPIO0->FIOSET = RED_LED;                    // Red LED off.
-    LPC_GPIO3->FIOSET = GREEN_LED | BLUE_LED;       // Green and blue LEDs off.
+    LPC_GPIO0->FIOSET = RED_BIT;                 // Red LED off.
+    LPC_GPIO3->FIOSET = GREEN_BIT | BLUE_BIT;    // Green and blue LEDs off.
 }
 
-void setLEDColor(const Color *color) {
+void setLEDColor(const Color* color) {
     if (color->r)
-        LPC_GPIO0->FIOCLR = RED_LED;                // Turn on red LED.
+        LPC_GPIO0->FIOCLR = RED_BIT;    // Turn on red LED.
     else
-        LPC_GPIO0->FIOSET = RED_LED;                // Turn off red LED.
+        LPC_GPIO0->FIOSET = RED_BIT;    // Turn off red LED.
 
     if (color->g)
-        LPC_GPIO3->FIOCLR = GREEN_LED;              // Turn on green LED.
+        LPC_GPIO3->FIOCLR = GREEN_BIT;    // Turn on green LED.
     else
-        LPC_GPIO3->FIOSET = GREEN_LED;              // Turn off green LED.
+        LPC_GPIO3->FIOSET = GREEN_BIT;    // Turn off green LED.
 
     if (color->b)
-        LPC_GPIO3->FIOCLR = BLUE_LED;               // Turn on blue LED.
+        LPC_GPIO3->FIOCLR = BLUE_BIT;    // Turn on blue LED.
     else
-        LPC_GPIO3->FIOSET = BLUE_LED;               // Turn off blue LED.
+        LPC_GPIO3->FIOSET = BLUE_BIT;    // Turn off blue LED.
 }
 
 void delay() {
     for (volatile uint32_t i = 0; i < DELAY; i++)
-        for (volatile uint32_t j = 0; j < DELAY ; j++);
+        for (volatile uint32_t j = 0; j < DELAY; j++)
+            __NOP();
 }
