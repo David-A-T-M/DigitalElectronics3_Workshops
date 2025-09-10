@@ -6,17 +6,17 @@
 #include "LPC17xx.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Mask for the 5 LEDs connected to P2.0-P2.4. */
-#define LEDS_MASK           BITS_MASK(5, 0)
-/** Double bit mask for the 5 LEDs connected to P2.0-P2.4. */
-#define LEDS_MASK_DB        BITS_MASK(10, 0)
+#define LEDS_MASK     BITS_MASK(5, 0)
+/** PCB mask for the 5 LEDs connected to P2.0-P2.4. */
+#define LEDS_MASK_PCB BITS_MASK(10, 0)
 
 /** Mask for the available pins on port 0. */
-#define PORT0_AV_MASK       (0x7FFF8FFF)
+#define PORT0_AV_MASK (0x7FFF8FFF)
 
 /**
  * @brief Configures the GPIO pins for the LEDs and input port.
@@ -41,24 +41,24 @@ int main(void) {
     while (1) {
         const uint8_t leds = countOnes(LPC_GPIO0->FIOPIN & PORT0_AV_MASK);
 
-        LPC_GPIO2->FIOCLR = LEDS_MASK;      // Turn off all LEDs.
-        LPC_GPIO2->FIOSET = leds;           // Displays the count on the LEDs
+        LPC_GPIO2->FIOCLR = LEDS_MASK;    // Turn off all LEDs.
+        LPC_GPIO2->FIOSET = leds;         // Displays the count on the LEDs
     }
     return 0;
 }
 
 void configGPIO(void) {
-    LPC_PINCON->PINSEL0 = 0;                // P0.0-P0.15 as GPIO.
-    LPC_PINCON->PINSEL1 = 0;                // P0.16-P1.31 as GPIO.
-    LPC_PINCON->PINSEL4 &= ~LEDS_MASK_DB;   // P2.0-P2.4 as GPIO.
+    LPC_PINCON->PINSEL0 = 0;                  // P0.0-P0.15 as GPIO.
+    LPC_PINCON->PINSEL1 = 0;                  // P0.16-P1.31 as GPIO.
+    LPC_PINCON->PINSEL4 &= ~LEDS_MASK_PCB;    // P2.0-P2.4 as GPIO.
 
-    LPC_PINCON->PINMODE0 = 0;               // P0.0-P0.15 with pull-up.
-    LPC_PINCON->PINMODE1 = 0;               // P1.0-P1.31 with pull-up.
+    LPC_PINCON->PINMODE0 = 0;    // P0.0-P0.15 with pull-up.
+    LPC_PINCON->PINMODE1 = 0;    // P1.0-P1.31 with pull-up.
 
-    LPC_GPIO0->FIODIR = 0;                  // P0.0-P0.31 as input.
-    LPC_GPIO2->FIODIR |= LEDS_MASK;         // P2.0-P2.4 as output.
+    LPC_GPIO0->FIODIR = 0;             // P0.0-P0.31 as input.
+    LPC_GPIO2->FIODIR |= LEDS_MASK;    // P2.0-P2.4 as output.
 
-    LPC_GPIO2->FIOCLR = LEDS_MASK;          // Turn off all LEDs.
+    LPC_GPIO2->FIOCLR = LEDS_MASK;    // Turn off all LEDs.
 }
 
 uint8_t countOnes(uint32_t value) {

@@ -7,14 +7,14 @@
 #include "lpc17xx_pinsel.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Mask for a 7 segments display. */
-#define SVN_SEGS            BITS_MASK(7, 0)
+#define SVN_SEGS   BITS_MASK(7, 0)
 /** Mask for input pins P0.0-P0.3. */
-#define INPUT_PINS          BITS_MASK(4, 0)
+#define INPUT_PINS BITS_MASK(4, 0)
 
 /**
  * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
@@ -39,28 +39,28 @@ int main(void) {
     configGPIO();
 
     while (1) {
-        uint32_t value = GPIO_ReadValue(GPIO_PORT_0) & INPUT_PINS;  // Read P0.0-P0.3.
-        GPIO_WriteValue(GPIO_PORT_2, digits[value]);                // Display the value on the 7-segment display.
+        uint32_t value = GPIO_ReadValue(GPIO_PORT_0) & INPUT_PINS;    // Read P0.0-P0.3.
+        GPIO_WriteValue(GPIO_PORT_2, digits[value]);                  // Display the value on the 7-segment display.
     }
     return 0;
 }
 
 void configGPIO(void) {
-    PINSEL_CFG_Type pinCfg = {0};                                   // PINSEL configuration structure.
+    PINSEL_CFG_Type pinCfg = {0};    // PINSEL configuration structure.
 
-    pinCfg.portNum = PINSEL_PORT_0;
-    pinCfg.pinNum = PINSEL_PIN_0;
-    pinCfg.funcNum = PINSEL_FUNC_0;
-    pinCfg.pinMode = PINSEL_PULLUP;
+    pinCfg.portNum   = PINSEL_PORT_0;
+    pinCfg.pinNum    = PINSEL_PIN_0;
+    pinCfg.funcNum   = PINSEL_FUNC_0;
+    pinCfg.pinMode   = PINSEL_PULLUP;
     pinCfg.openDrain = PINSEL_OD_NORMAL;
 
-    PINSEL_ConfigMultiplePins(&pinCfg, INPUT_PINS);                 // P0.0-P0.3 as GPIO with pull-up.
+    PINSEL_ConfigMultiplePins(&pinCfg, INPUT_PINS);    // P0.0-P0.3 as GPIO with pull-up.
 
     pinCfg.portNum = PINSEL_PORT_2;
-    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SEGS);                   // P2.0-P2.6 as GPIO
+    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SEGS);    // P2.0-P2.6 as GPIO
 
-    GPIO_SetDir(GPIO_PORT_0, INPUT_PINS, GPIO_INPUT);               // P0.0-P0.3 as input.
-    GPIO_SetDir(GPIO_PORT_2, SVN_SEGS, GPIO_OUTPUT);                // P2.0-P2.6 as output.
+    GPIO_SetDir(GPIO_PORT_0, INPUT_PINS, GPIO_INPUT);    // P0.0-P0.3 as input.
+    GPIO_SetDir(GPIO_PORT_2, SVN_SEGS, GPIO_OUTPUT);     // P2.0-P2.6 as output.
 
-    GPIO_ClearPins(GPIO_PORT_2, SVN_SEGS);                          // Turn off all segments.
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SEGS);    // Turn off all segments.
 }

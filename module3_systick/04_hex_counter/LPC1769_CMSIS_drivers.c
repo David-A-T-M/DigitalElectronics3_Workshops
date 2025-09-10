@@ -11,26 +11,26 @@
 #include "lpc17xx_systick.h"
 
 /** Generic bit mask macro. */
-#define BIT_MASK(x)         (0x1 << (x))
+#define BIT_MASK(x)     (0x1 << (x))
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Seven segments display connected to P2.0-P2.6. */
-#define SVN_SGS             (0)
+#define SVN_SGS (0)
 
 /** Mask for a 7 segments display. */
-#define SVN_SGS_BITS        BITS_MASK(7, SVN_SGS)
+#define SVN_SGS_BITS BITS_MASK(7, SVN_SGS)
 
 /** Number of elements in the digits array. */
-#define DIGITS_SIZE         (sizeof(digits) / sizeof(digits[0]))
+#define DIGITS_SIZE (sizeof(digits) / sizeof(digits[0]))
 
 /** Blink time in milliseconds. */
-#define COUNT_TIME          (1000)
+#define COUNT_TIME (1000)
 /** SysTick timer interval in milliseconds. */
-#define ST_TIME             (100)
+#define ST_TIME    (100)
 
 /** Number of SysTick interrupts to achieve the desired count time. */
-#define ST_MULT             ((COUNT_TIME/ST_TIME) - 1)
+#define ST_MULT ((COUNT_TIME / ST_TIME) - 1)
 
 /**
  * @brief Configures GPIO pins for 7-segment display output.
@@ -60,49 +60,49 @@ int main(void) {
     configGPIO();
     configSysTick(ST_TIME);
 
-    while(1) {
+    while (1) {
         __WFI();
     }
-    return 0 ;
+    return 0;
 }
 
 void configGPIO(void) {
-    PINSEL_CFG_Type pinCfg = {0};                       // PINSEL configuration structure.
+    PINSEL_CFG_Type pinCfg = {0};    // PINSEL configuration structure.
 
-    pinCfg.portNum = PINSEL_PORT_2;
-    pinCfg.pinNum = PINSEL_PIN_0;
-    pinCfg.funcNum = PINSEL_FUNC_0;
-    pinCfg.pinMode = PINSEL_PULLUP;
+    pinCfg.portNum   = PINSEL_PORT_2;
+    pinCfg.pinNum    = PINSEL_PIN_0;
+    pinCfg.funcNum   = PINSEL_FUNC_0;
+    pinCfg.pinMode   = PINSEL_PULLUP;
     pinCfg.openDrain = PINSEL_OD_NORMAL;
 
-    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SGS_BITS);   // P2.0-P2.6 as GPIO.
-    GPIO_SetDir(GPIO_PORT_2, SVN_SGS_BITS, GPIO_OUTPUT);// P2.0-P2.6 as output.
+    PINSEL_ConfigMultiplePins(&pinCfg, SVN_SGS_BITS);       // P2.0-P2.6 as GPIO.
+    GPIO_SetDir(GPIO_PORT_2, SVN_SGS_BITS, GPIO_OUTPUT);    // P2.0-P2.6 as output.
 
-    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);          // Turns off all segments.
-    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]); // Start with digit 0.
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);             // Turns off all segments.
+    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);    // Start with digit 0.
     i++;
 }
 
 void configSysTick(uint32_t time) {
-    SYSTICK_InternalInit(time);                         // Initialize SysTick interval.
-    SYSTICK_IntCmd(ENABLE);                             // Enable SysTick interrupt.
-    SYSTICK_Cmd(ENABLE);                                // Enable SysTick counter.
+    SYSTICK_InternalInit(time);    // Initialize SysTick interval.
+    SYSTICK_IntCmd(ENABLE);        // Enable SysTick interrupt.
+    SYSTICK_Cmd(ENABLE);           // Enable SysTick counter.
 
-    NVIC_EnableIRQ(SysTick_IRQn);                       // Enable SysTick interrupt in NVIC.
+    NVIC_EnableIRQ(SysTick_IRQn);    // Enable SysTick interrupt in NVIC.
 }
 
 void SysTick_Handler(void) {
     static uint8_t intCount = ST_MULT;
 
     if (intCount) {
-        intCount--;                                     // Decrement interrupt counter.
+        intCount--;    // Decrement interrupt counter.
 
         return;
     }
 
-    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);          // Turns off all segments.
-    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]); // Sets segments for current digit.
+    GPIO_ClearPins(GPIO_PORT_2, SVN_SGS_BITS);             // Turns off all segments.
+    GPIO_SetPins(GPIO_PORT_2, digits[i % DIGITS_SIZE]);    // Sets segments for current digit.
 
-    intCount = ST_MULT;                                 // Reset interrupt counter.
+    intCount = ST_MULT;    // Reset interrupt counter.
     i++;
 }

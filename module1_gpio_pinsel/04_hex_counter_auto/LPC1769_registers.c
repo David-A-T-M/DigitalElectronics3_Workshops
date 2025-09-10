@@ -10,18 +10,19 @@
 #include "LPC17xx.h"
 
 /** Generic n-bit mask macro. */
-#define BITS_MASK(x, s)     (((0x1 << (x)) - 1) << (s))
+#define BITS_MASK(x, s) (((0x1 << (x)) - 1) << (s))
 
 /** Mask for a 7 segments display. */
-#define SVN_SEGS            BITS_MASK(7, 0)
-/** Double bit mask for a 7 segments display. */
-#define SVN_SEGS_DB         BITS_MASK(14, 0)
+#define SVN_SEGS BITS_MASK(7, 0)
+
+/** PCB mask for a 7 segments display. */
+#define SVN_SEGS_PCB BITS_MASK(14, 0)
 
 /** Number of elements in the digits array. */
-#define DIGITS_SIZE         (sizeof(digits) / sizeof(digits[0]))
+#define DIGITS_SIZE (sizeof(digits) / sizeof(digits[0]))
 
 /** Delay constant for LED timing. */
-#define DELAY               2500
+#define DELAY 2500
 
 /**
  * @brief Configures GPIO pins P2.0-P2.6 as outputs to control a 7-segment display.
@@ -56,16 +57,17 @@ int main(void) {
 }
 
 void configGPIO(void) {
-    LPC_PINCON->PINSEL4 &= ~(SVN_SEGS_DB);              // P2.0-P2.6 as GPIO.
+    LPC_PINCON->PINSEL4 &= ~(SVN_SEGS_PCB);    // P2.0-P2.6 as GPIO.
 
-    LPC_GPIO2->FIOMASK = ~(SVN_SEGS);                   // Optional: Set mask for protection.
+    LPC_GPIO2->FIOMASK = ~(SVN_SEGS);    // Optional: Set mask for protection.
 
-    LPC_GPIO2->FIODIR |= SVN_SEGS;                      // P2.0-P2.6 as output.
+    LPC_GPIO2->FIODIR |= SVN_SEGS;    // P2.0-P2.6 as output.
 
-    LPC_GPIO2->FIOCLR = SVN_SEGS;                       // Turn off all segments.
+    LPC_GPIO2->FIOCLR = SVN_SEGS;    // Turn off all segments.
 }
 
 void delay() {
     for (volatile uint32_t i = 0; i < DELAY; i++)
-        for (volatile uint32_t j = 0; j < DELAY; j++);
+        for (volatile uint32_t j = 0; j < DELAY; j++)
+            __NOP();
 }
