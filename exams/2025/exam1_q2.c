@@ -48,11 +48,11 @@ void EINT1_IRQHandler(void) {
         SysTick->VAL = 0;    // Reset SysTick counter
 
         if (t < 100) {
-            period = 100;
+            period = 50;
         } else if (t > 1000) {
-            period = 1000;
+            period = 500;
         } else {
-            period = t;
+            period = t / 2;
         }
 
         t = 0;
