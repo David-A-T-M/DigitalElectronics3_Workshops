@@ -78,8 +78,6 @@ void configSysTick(uint32_t ticks) {
     SysTick->CTRL = ST_ENABLE |      // Enable SysTick interrupt.
                     ST_TICKINT |     // Enable SysTick exception request.
                     ST_CLKSOURCE;    // Use processor clock.
-
-    NVIC_EnableIRQ(SysTick_IRQn);    // Enable SysTick interrupt in NVIC.
 }
 
 void SysTick_Handler(void) {

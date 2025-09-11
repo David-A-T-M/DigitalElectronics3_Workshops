@@ -119,8 +119,6 @@ void configSysTick(uint32_t time) {
     SYSTICK_InternalInit(time);    // Initialize SysTick.
     SYSTICK_IntCmd(ENABLE);        // Enable SysTick interrupt.
     SYSTICK_Cmd(ENABLE);           // Enable SysTick timer.
-
-    NVIC_EnableIRQ(SysTick_IRQn);    // Enable SysTick interrupt in NVIC.
 }
 
 void SysTick_Handler(void) {
